@@ -5,3 +5,4 @@ _testing.py
 courses_data.json
 output.txt
 scraped_data.json
+.env
