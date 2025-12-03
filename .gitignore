@@ -1,8 +1,4 @@
-__pycache__
-workers/__pycache__
-.vscode
-_testing.py
-courses_data.json
-output.txt
-scraped_data.json
-.env
+.vscode/
+.testing/
+**/__pycache__
+**/_testing.py
