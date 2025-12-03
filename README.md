@@ -46,8 +46,7 @@ Everything else used in the project is part of the Python standard library.
 
 ![image](https://raw.githubusercontent.com/AlvarodOrs/TestSolver/refs/heads/main/img/get_int.png)
 
-Click the wanted course (1), then copy the url code (2).
-Repeat with all desired courses.
+Click the wanted course (1), then copy the url code (2) and repeat with all desired courses.
 
 #### Run the bot with:
 
