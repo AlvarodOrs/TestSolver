@@ -92,7 +92,8 @@ def solve_question(wrapper_or_driver, question_indx:int, timeout:int=10, answers
     driver = getattr(wrapper_or_driver, "driver", wrapper_or_driver)
     pregunta = WebDriverWait(driver, timeout).until(
             EC.element_to_be_clickable((By.XPATH, f"//div[contains(@class, 'que')][.//span[@class='qno' and text()='{question_indx}']]")))
-    
+    driver.execute_script("arguments[0].scrollIntoView();", pregunta)
+
     try:
         pregunta.find_element(By.CSS_SELECTOR, f"input[type='radio'][value='{answers}']").click()
         return True
@@ -106,7 +107,7 @@ def solve_multiple_choice(wrapper_or_driver, question_indx:int, timeout:int=10, 
     driver = getattr(wrapper_or_driver, "driver", wrapper_or_driver)
     pregunta = WebDriverWait(driver, timeout).until(
             EC.element_to_be_clickable((By.XPATH, f"//div[contains(@class, 'que')][.//span[@class='qno' and text()='{question_indx}']]")))
-
+    driver.execute_script("arguments[0].scrollIntoView();", pregunta)
     try:
         num_answers = get_num_options(wrapper_or_driver, question_indx=question_indx, timeout=10)
         if isinstance(answers, int): answers = [_ for _ in range(num_answers)]
@@ -116,7 +117,12 @@ def solve_multiple_choice(wrapper_or_driver, question_indx:int, timeout:int=10, 
                     f"div.answer input[type='checkbox'][name*='{question_indx}_choice{answer}']")
                 driver.execute_script("arguments[0].scrollIntoView(true);", option)
                 option.click()
-            except Exception as e: print(e)
+            except Exception as e: 
+                option = pregunta.find_element(By.CSS_SELECTOR,
+                    f"div.answer input[type='checkbox'][name*='{question_indx}_choice{answer}']")
+                driver.execute_script("arguments[0].scrollIntoView(true);", option)
+                driver.execute_script("arguments[0].click();", option)
+                print(f"\033[33m[!] Question #{question_indx} is wrong, no correct solution\033[0m")
         return True
 
     except Exception as e:
@@ -232,7 +238,6 @@ def read_answers(wrapper_or_driver, timeout:int=10):
         EC.element_to_be_clickable((By.XPATH, '//*[@id="region-main"]/div[2]/div/a'))
     )
     finish_revision.click()
-    print(f"RESULTS:\n {results}")
     return results
 
 if __name__ == "__main__":

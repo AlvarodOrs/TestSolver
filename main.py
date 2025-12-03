@@ -21,9 +21,7 @@ def iterate_tests(automation, page, DEBUGGING=False):
     tests = automation.driver.find_elements(By.XPATH, "//span[@class='text-activityname' and contains(text(), 'Test Tema')]")
     _indx = 0
     for test_url in tests_urls:
-
         _indx += 1
-        if _indx == 1: continue #REMOVE
         print(f"    \033[4m[+] Going to test number {_indx}\033[0m")
         
         automation.navigate(test_url)
@@ -95,7 +93,7 @@ def iterate_courses(automation, UNIR_COURSES):
         actividades.click()
     
         
-        iterate_tests(automation, course_id, DEBUGGING=True)
+        iterate_tests(automation, course_id, DEBUGGING=False)
         
     print("\n[+] All courses completed")
         

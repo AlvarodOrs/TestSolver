@@ -44,6 +44,8 @@ def setup_config() -> dict:
     if args.username: config["UNIR_USERNAME"] = args.username
     if args.password: config["UNIR_PASSWORD"] = args.password
     if args.courses: config["UNIR_COURSES"] = args.courses
+    if args.target_url: config["LOGIN_URL"] = args.target_url
+    if args.menu_xpath: config["MENU_XPATH"] = args.menu_xpath
     if args.example:
 
         print('\033[33m[?] python main.py --username tu@correo.com --password contraseña1234 --courses 1234,1235,1234\033[0m')
