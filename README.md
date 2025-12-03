@@ -1,84 +1,108 @@
-# Web Automation Bot
+# UNIR Test Bot
 
-A Python-based web automation framework using Selenium for automating browser tasks.
+A command-line automation tool that logs into the UNIR virtual campus, enters the specified subjects, and resolves the available tests automatically using Selenium.
 
 ## Features
 
-- Browser automation with Selenium
-- Support for Chrome (with automatic driver management)
-- Easy-to-use API for common automation tasks
-- Modular worker system for specific automation tasks
+* Automates login to the UNIR platform
+* Navigates into one or multiple courses
+* Detects and answers test questions (single choice and multi-choice)
+* Collects correction results when available
+* Uses Chrome WebDriver automatically (via `webdriver-manager`)
+* Fully scriptable from the command line
 
-## Installation
+---
 
-1. Install dependencies:
+## Requirements
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/AlvarodOrs/TestSolver.git
+cd TestSolver
+```
+
+* Python 3.10+
+* Google Chrome installed
+
+Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-2. For Playwright (optional), install browsers:
-```bash
-playwright install
-```
+This installs:
+
+* selenium
+* webdriver-manager
+
+Everything else used in the project is part of the Python standard library.
+
+---
 
 ## Usage
 
-### Basic Example
+#### Get the COURSE_ID with:
 
-```python
-from main import WebAutomation
+![image](https://raw.githubusercontent.com/AlvarodOrs/TestSolver/refs/heads/main/img/get_int.png)
 
-# Create automation instance
-automation = WebAutomation(headless=False)
+Click the wanted course (1), then copy the url code (2).
+Repeat with all desired courses.
 
-try:
-    # Navigate to a website
-    automation.navigate("https://www.example.com")
-    
-    # Click an element
-    automation.click(By.ID, "button-id")
-    
-    # Type text
-    automation.type_text(By.NAME, "username", "myusername")
-    
-finally:
-    automation.close()
+#### Run the bot with:
+
+```bash
+python main.py --username tu@correo.com --password contraseña1234 --courses codigomateria1,codigomateria2,...
 ```
 
-### Using Workers
+### Arguments
 
-```python
-from bot_launcher import launch_bot
-import workers
+| Argument     | Required | Description                                |
+| ------------ | -------- | ------------------------------------------ |
+| `--username` | Yes      | Your UNIR login email                      |
+| `--password` | Yes      | Your UNIR campus password                  |
+| `--courses`  | Yes      | Comma-separated list of course identifiers |
 
-automation = launch_bot(headless=False)
+Example:
 
-try:
-    # Login
-    workers.logIn(automation)
-    
-    # Find and click on courses
-    workers.find_and_click_courses(automation)
-finally:
-    automation.close()
+```bash
+python main.py \
+  --username usuario@unir.net \
+  --password MiContraseñaSegura \
+  --courses ADS123,ALG202,POO455
 ```
 
-## Available Methods
+---
 
-- `navigate(url)` - Navigate to a URL
-- `click(by, value)` - Click an element
-- `type_text(by, value, text)` - Type text into an input
-- `find_element(by, value)` - Find an element
-- `get_text(by, value)` - Get text from an element
-- `wait_for_element(by, value)` - Wait for element to appear
+## Project Structure
 
-## Browser Options
-
-- `headless=True` - Run browser without GUI
-- `browser="chrome"` - Choose browser (currently only Chrome supported)
-
+```
+project/
+│
+├── main.py             # Entry point
+├── workers/            # Selenium automation logic
+│   ├── __init__.py
+│   ├── args.py
+│   └── tools.py
+│
+├── utils.py
+│   ├── __init__.py
+│   ├── bot_launcher.py
+│   ├── log_in.py
+│   └── test.py
+|
+├── requirements.txt
+└── README.md
+```
 ## Notes
 
-- ChromeDriver is automatically downloaded and managed via webdriver-manager
-- Make sure Chrome browser is installed on your system
+* Use a real Chrome installation; Chromium-based forks may cause failures.
+* If your campus has 2FA enabled, the bot will not complete the login automatically.
+* The automation depends on UNIR’s HTML structure; if UNIR updates the site, selectors may need adjustments.
 
+---
+
+## License
+
+MIT License.
+You are responsible for any use of this script on your own account.
