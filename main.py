@@ -6,10 +6,10 @@ from selenium.webdriver.support import expected_conditions as EC
 import os
 import time
 
-def enter_UNIR(automation, AUTOMATED_LOGIN, UNIR_USERNAME, UNIR_PASSWORD, LOGIN_URL, MENU_XPATH):
+def enter_UNIR(automation, AUTOMATED_LOGIN, UNIR_USERNAME, UNIR_PASSWORD, LOGIN_URL, timeout):
     # Step 1: Login
     print("[+] Entering UNIR")
-    login_success = log_in.logIn(automation, login_url=LOGIN_URL, automated_login=AUTOMATED_LOGIN, username=UNIR_USERNAME, password=UNIR_PASSWORD)
+    login_success = log_in.logIn(automation, login_url=LOGIN_URL, automated_login=AUTOMATED_LOGIN, username=UNIR_USERNAME, password=UNIR_PASSWORD, timeout=timeout)
     if not login_success:
         print("\n[-] Login failed. Check your credentials and try again")
         return
@@ -32,7 +32,7 @@ def iterate_tests(automation, page, DEBUGGING=False):
         available_answer_options = ['a', 'b', 'c', 'd', 'e']
         
         while 0 in test_results or not test_results:
-            
+
             if not test.find_test_button(automation, timeout=10):
                 print(f"[!] Can't find test button")
             answer_letter = available_answer_options[default_answer]
@@ -99,7 +99,10 @@ def iterate_courses(automation, UNIR_COURSES):
         
 
 def main():
-    """Main function to orchestrate bot operations"""
+    """
+    Main function to orchestrate bot operations
+    """
+    os.system("")
     # Launch the bot
     AUTOMATED_LOGIN = True
     cfg = tools.setup_config()
@@ -109,12 +112,12 @@ def main():
     if "UNIR_COURSES" in cfg: UNIR_COURSES = cfg["UNIR_COURSES"]
     if "AUTOMATED_LOGIN" in cfg: AUTOMATED_LOGIN = cfg["AUTOMATED_LOGIN"]
     if "LOGIN_URL" in cfg: LOGIN_URL = cfg["LOGIN_URL"]
-    if "MENU_XPATH" in cfg: MENU_XPATH = cfg["MENU_XPATH"]
+    timeout = 10
     
     print(f"[+] Running bot for user: {UNIR_USERNAME}")
     automation = bot_launcher.launch_bot(headless=False)
     try:
-        enter_UNIR(automation, AUTOMATED_LOGIN, UNIR_USERNAME, UNIR_PASSWORD, LOGIN_URL, MENU_XPATH)
+        enter_UNIR(automation, AUTOMATED_LOGIN, UNIR_USERNAME, UNIR_PASSWORD, LOGIN_URL, timeout)
         
         iterate_courses(automation, UNIR_COURSES)
         

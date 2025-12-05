@@ -1,20 +1,21 @@
 try: from utils import args as arg
 except ImportError: import args as arg
+import winsound
 
-def beep_sound() -> None:
-    import winsound
-    frequency = 3000  # Set Frequency To 2500 Hertz
-    duration = 1000  # Set Duration To 1000 ms == 1 second
+def beep_sound(frequency:int = 3000, duration:int = 1000) -> None:
+    """
+    Simple sound maker to notify user when the bot is done
+    """
     winsound.Beep(frequency, duration)
 
-def is_element(element: str, automation) -> bool:
-    html = automation.get_page_source()
-    return element in html
-
 class ASCII_ART:
-
+    """
+    Simple class function to print ASCII art on the terminal, works better in ANSI code supporting terminals (for the text formatting code)
+    """
     def title() -> None:
-        
+        """
+        Prints the program "logo"
+        """
         print("\033[95m\n+=======================================+")
         print(r"|   _   _ _   _ ___________             |")
         print(r"|  | | | | \ | |_   _| ___ \            |")
@@ -35,9 +36,24 @@ class ASCII_ART:
         print("By Álvaro d'Ors Nestares\033[0m\n\n")
 
 def setup_config() -> dict:
-
-    args = arg.parse_args()
-    
+    """
+    Sets up the program variables:
+        AUTOMATED_LOGIN -> bool, True or False:
+            Login will be executed by the bot or the user,
+        
+        UNIR_USERNAME -> string, your@unir.email:
+            Bot will use this as your valid UNIR/Moodle email,
+        
+        UNIR_PASSWORD -> string, yourpassword:
+            Bot will use this as your valid UNIR/Moodle password,
+        
+        UNIR_COURSES -> string (of integers), COURSE1,COURSE2...:
+            Bot will use those as the desired tests to complete,
+        
+        LOGIN_URL -> string, https://your.desired.moodle/login/page:  (default, UNIR's one)
+            Bot will use this for the login process
+    """
+    args = arg.parse_args() 
     config = {}
     
     if args.username is None or args.password is None: config["AUTOMATED_LOGIN"] = False
@@ -45,16 +61,23 @@ def setup_config() -> dict:
     if args.password: config["UNIR_PASSWORD"] = args.password
     if args.courses: config["UNIR_COURSES"] = args.courses
     if args.target_url: config["LOGIN_URL"] = args.target_url
-    if args.menu_xpath: config["MENU_XPATH"] = args.menu_xpath
     if args.example:
-
         print('\033[33m[?] python main.py --username tu@correo.com --password contraseña1234 --courses 1234,1235,1234\033[0m')
         exit(0)
-
     return config
 
 def swap_errors_with(original_list: list, new_value: int) -> list:
-    
+    """
+    Function to overwrite the test incorrect answers with the next desired option:
+        original_list -> list, [1, 0, 0, 2, 3]:
+            A list containing the last tried answers with 0 for the incorrect solutions,
+        
+        new_value -> int, 1 for A, 2 for B, 3 for C...:
+            The next value to try as an answer,
+        
+        returns -> list, [1, 4, 4, 2, 3]:
+            The original_list with the next value for each 0
+    """
     new_list = []
 
     for value in original_list:
@@ -64,7 +87,14 @@ def swap_errors_with(original_list: list, new_value: int) -> list:
     return new_list
 
 def dict_to_list(dictionary: dict) -> list:
-
+    """
+    Transforms a dictionary (from test.read_answers()) to a usable list:
+        dictionary -> dict, {1: 1, 2: 0, 3: 0, 4: 2, 5: 3}:
+            The results after reading test's correction (with 0 for each wrong answer),
+        
+        returns -> list, [1, 0, 0, 2, 3]:
+            The same dictionary as a list where the index of a solution is the question's number
+    """
     new_list = []
     
     for key, value in dictionary.items(): new_list.append(value)
@@ -72,7 +102,17 @@ def dict_to_list(dictionary: dict) -> list:
     return new_list
 
 def combinate_answers(original_answers: list, binary_answers: list) -> list:
-    
+    """
+    Simple vectorial multiplication:
+        original_answers -> list, [1, 3, 3, 2, 3]:
+            The list of the last tried answers,
+
+        binary_answers -> list, [1, 0, 0, 1, 1]:
+            The list correct or incorrect questions,
+        
+        returns -> list, [1, 0, 0, 2, 3]:
+                The list of the correct answers
+    """
     combined = []
 
     for i in range(len(original_answers)):
@@ -82,4 +122,4 @@ def combinate_answers(original_answers: list, binary_answers: list) -> list:
     return combined
     
 if __name__ == "__main__":
-    print(combinate_answers([2, 1, 2, 2, 1, 2, 2, 1, [0, 1], 2], [0, 1, 0, 0, 1, 0, 0, 1, [0, 1], 0]))
+    pass
