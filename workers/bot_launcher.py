@@ -1,7 +1,6 @@
 """
 AI made code, to save time
 """
-
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -17,69 +16,88 @@ import time
 
 class WebAutomation:
     """Base class for web automation tasks"""
-    
-    def __init__(self, headless=False, browser="chrome"):
+    def __init__(self, headless:bool = False, browser:str = "chrome"):
         """
         Initialize the web automation driver
-        
-        Args:
-            headless: Run browser in headless mode (no GUI)
-            browser: Browser to use ('chrome' or 'firefox')
+            headless -> bool, True or False:
+                Run browser in headless mode or not,
+            
+            browser -> str, chrome:
+                Browser to use            
         """
         self.headless = False
         self.browser = browser
         self.driver = None
         self.wait = None
+    def start(self) -> "WebAutomation":
+        """
+        Starts the browser driver
+            returns -> self, WebAutomation:
+                Selenium's WebAutomation instance
+        """
+        #if self.browser.lower() == "chrome":
+        chrome_options = Options()
+
+        if self.headless: chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
         
-    def start(self):
-        """Start the browser driver"""
-        if self.browser.lower() == "chrome":
-            chrome_options = Options()
-            if self.headless:
-                chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--no-sandbox")
-            chrome_options.add_argument("--start-maximized")
-            chrome_options.add_argument("--disable-dev-shm-usage")
-            chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-            chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-            chrome_options.add_experimental_option('useAutomationExtension', False)
-            
-            service = Service(ChromeDriverManager().install())
-            self.driver = webdriver.Chrome(service=service, options=chrome_options)
-        else:
-            raise ValueError(f"Browser {self.browser} not supported yet")
-        
+        service = Service(ChromeDriverManager().install())
+        self.driver = webdriver.Chrome(service=service, options=chrome_options)        
         self.wait = WebDriverWait(self.driver, 10)
         return self.driver
     
-    def navigate(self, url):
-        """Navigate to a URL"""
-        if not self.driver:
-            self.start()
+    def navigate(self, url:str) -> "WebAutomation":
+        """
+        Navigates to a URL
+            url -> str, https://www.google.com:
+                The desired url to go to,
+            
+            returns -> self, WebAutomation:
+                Selenium's WebAutomation instance
+        """
+        if not self.driver: self.start()
         self.driver.get(url)
         return self
     
-    def find_element(self, by, value, timeout=10):
+    def find_element(self, by:By, value:str, timeout:int = 10) -> "WebAutomation":
         """Find an element with explicit wait"""
         wait = WebDriverWait(self.driver, timeout)
         return wait.until(EC.presence_of_element_located((by, value)))
     
-    def click(self, by, value, timeout=10):
+    def wait_and_click(self, by:By, value:str, timeout:int = 10) -> "WebAutomation":
         """Click an element"""
         wait = WebDriverWait(self.driver, timeout)
         element = wait.until(EC.element_to_be_clickable((by, value)))
         element.click()
         return self
     
-    def type_text(self, by, value, text, timeout=10, slow_typing=False):
+    def type_text(
+        self,
+        by:By,
+        value:str,
+        text:str,
+        timeout:int = 10,
+        slow_typing:bool = False
+        ) -> "WebAutomation":
         """
         Type text into an input field
-        
-        Args:
-            by: Selenium By locator
-            value: Value for the locator
-            text: Text to type
-            timeout: Timeout for finding element
+            by -> By:
+                Selenium By By,
+
+            value -> str, Username:
+                Value for the By to search,
+
+            text -> str, pepe:
+                Text to type in the desired location,
+
+            timeout -> int, 10:
+                Time to wait for elements to load,
+
             slow_typing: If True, type character by character with delay
         """
         element = self.find_element(by, value, timeout)
@@ -111,25 +129,14 @@ class WebAutomation:
         
         time.sleep(0.2)
         return self
-    
-    def wait_for_element(self, by, value, timeout=10):
-        """Wait for an element to be present"""
-        return self.find_element(by, value, timeout)
-    
-    def get_text(self, by, value, timeout=10):
+        
+    def get_text(self, by:By, value:str, timeout:int = 10) -> "WebAutomation":
         """Get text from an element"""
         element = self.find_element(by, value, timeout)
         return element.text
     
-    def get_page_source(self):
-        """Get the full page source"""
-        return self.driver.page_source
     
-    def get_current_url(self):
-        """Get the current page URL"""
-        return self.driver.current_url
-    
-    def custom_close(self):
+    def custom_close(self) -> "WebAutomation":
         """Safely close the browser and end the WebDriver session"""
         if self.driver:
             try:
@@ -146,16 +153,17 @@ class WebAutomation:
             finally:
                 self.driver = None
 
-def launch_bot(headless=False, browser="chrome"):
+def launch_bot(headless:bool = False, browser:str = "chrome") -> "WebAutomation":
     """
     Launch and return a WebAutomation instance
-    
-    Args:
-        headless: Run browser in headless mode
-        browser: Browser to use
+        headless -> bool, True or False:
+            Run browser in headless mode or not,
         
-    Returns:
-        WebAutomation instance
+        browser -> str, chrome:
+            Browser to use,
+        
+        returns -> self, WebAutomation:
+            Selenium's WebAutomation instance
     """
     bot = WebAutomation(headless=False, browser=browser)
     bot.start()

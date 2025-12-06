@@ -4,26 +4,23 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from typing import Union
 import time
+import re
 
-def find_mark(wrapper_or_driver, timeout:int=10) -> int:
+def find_mark(automation:"WebAutomation", timeout:int = 10) -> int:
     """
     Function to find the mark of the test done
-        wrapper_or_driver -> Selenium driver:
-            The Selenium bot driver,
+        automation -> Selenium driver:
+            Selenium's WebAutomation instance,
 
         timeout -> int, 10:
-            The time to wait for elements to load,
+            Time to wait for elements to load,
             
         returns -> int, 30:
             The mark of the last test
     """
-    driver = getattr(wrapper_or_driver, "driver", wrapper_or_driver)
-    mark_box = WebDriverWait(driver, timeout).until(
-        EC.presence_of_element_located((By.XPATH, "//tr[th[normalize-space()='Calificación']]/td")))
+    mark_box = automation.get_text(By.XPATH, "//tr[th[normalize-space()='Calificación']]/td")
+    match = re.search(r"\d+\s*%", mark_box)
     
-    import re
-    match = re.search(r"\d+\s*%", mark_box.text)
-
     try: return match.group()
 
     except Exception as e:
@@ -31,78 +28,65 @@ def find_mark(wrapper_or_driver, timeout:int=10) -> int:
 
         return -1
 
-def find_test_button(wrapper_or_driver, timeout:int=10) -> bool:
+def find_test_button(automation:"WebAutomation", timeout:int = 10) -> bool:
     """
     Function to find the button to start a test
-        wrapper_or_driver -> Selenium driver:
-            The Selenium bot driver,
+        automation -> Selenium driver:
+            Selenium's WebAutomation instance,
 
         timeout -> int, 10:
-            The time to wait for elements to load,
+            Time to wait for elements to load,
             
         returns -> bool, True or False:
             If it was able to find the button
     """
-    driver = getattr(wrapper_or_driver, "driver", wrapper_or_driver)
     xpaths = [
         "Accede al test",
         "Continuar test",
         "Reintentar test",
     ]
-    
-    boton = None
-
     for xp in xpaths:
 
         try:
-            boton = WebDriverWait(driver, timeout/10).until(
-                EC.element_to_be_clickable((By.XPATH, f"//button[text()='{xp}']")))
-            break  # Found, exit loop
+            automation.wait_and_click(By.XPATH, f"//button[text()='{xp}']",timeout/10)
+            return True  # Found, exit loop
 
-        except TimeoutException:
-            continue  # Try next XPath
+        except TimeoutException: continue  # Try next XPath
     
-    if boton: 
-        boton.click()
-        return True
+    raise Exception("No se encontró ningún botón de test clickeable")
+    return False # Useless actually
 
-    else:
-        raise Exception("No se encontró ningún botón de test clickeable")
-        return False
-
-def get_tests(wrapper_or_driver, timeout:int=10) -> list:
+def get_tests(automation:"WebAutomation", timeout:int = 10) -> list:
     """
     Function to find the url of the tests to do
-        wrapper_or_driver -> Selenium driver:
-            The Selenium bot driver,
+        automation -> Selenium driver:
+            Selenium's WebAutomation instance,
 
         timeout -> int, 10:
-            The time to wait for elements to load,
+            Time to wait for elements to load,
             
         returns -> list, ["https://...", "https://...", ...]:
             The links to the tests to do
     """
-    driver = getattr(wrapper_or_driver, "driver", wrapper_or_driver)
-    WebDriverWait(driver, timeout).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "activities-list")))
+    automation.find_element(By.CLASS_NAME, "activities-list", timeout)
 
-    tests_links = driver.find_elements(By.CSS_SELECTOR, ".activity-carditem[data-component='quiz'] a.stretched-link")
+    tests_links = automation.driver.find_elements(By.CSS_SELECTOR, ".activity-carditem[data-component='quiz'] a.stretched-link")
 
     return [link.get_attribute("href") for link in tests_links]
 
-def get_num_questions(wrapper_or_driver, timeout:int=10) -> int:
+def get_num_questions(automation:"WebAutomation", timeout:int = 10) -> int:
     """
     Function to find the number of questions in a test
-        wrapper_or_driver -> Selenium driver:
-            The Selenium bot driver,
+        automation -> Selenium driver:
+            Selenium's WebAutomation instance,
 
         timeout -> int, 10:
-            The time to wait for elements to load,
+            Time to wait for elements to load,
             
         returns -> int, 30:
             The amount of questions a test has
     """
-    driver = getattr(wrapper_or_driver, "driver", wrapper_or_driver)
+    driver = getattr(automation, "driver", automation)
     WebDriverWait(driver, timeout).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.que")))
 
@@ -113,14 +97,17 @@ def get_num_questions(wrapper_or_driver, timeout:int=10) -> int:
 
         return -1
 
-def get_num_options(wrapper_or_driver, question_indx:int, timeout:int=10) -> int:
+def get_num_options(wrapper_or_driver:"WebAutomation", question_indx:int, timeout:int = 10) -> int:
     """
     Function to find the number of answers in a question
         wrapper_or_driver -> Selenium driver:
-            The Selenium bot driver,
+            Selenium's WebAutomation instance,
+        
+        question_indx -> int, 1:
+            The index of the question to retrieve data from,
 
         timeout -> int, 10:
-            The time to wait for elements to load,
+            Time to wait for elements to load,
             
         returns -> int, 30:
             The amount of answers a question has
@@ -144,26 +131,32 @@ def get_num_options(wrapper_or_driver, question_indx:int, timeout:int=10) -> int
 
     except Exception as e: print(f"\033[33m[!] Error getting answer options from question #{question_indx}: {e}\nSearching as multi-choice\033[0m")
 
-def solve_question(wrapper_or_driver, question_indx:int, timeout:int=10, answers:Union[int, list, None]=None, DEBUGGING:bool=False) -> bool:
+def solve_question(
+    wrapper_or_driver:"WebAutomation",
+    question_indx:int,
+    answers:Union[int, list, None] = None,
+    timeout:int = 10,
+    DEBUGGING:bool = False
+    ) -> bool:
     """
     Function to solve the question of a test
         wrapper_or_driver -> Selenium driver:
-            The Selenium bot driver,
+            Selenium's WebAutomation instance,
 
         question_indx -> int, 3:
             The index of the question to solve,
 
         timeout -> int, 10:
-            The time to wait for elements to load,
+            Time to wait for elements to load,
         
         answers -> int or list, 1 or [1, 0, 0, 2, 3]:
             The next set of answers to try,
 
-        DEBUGGING -> bool, True or false:
+        DEBUGGING -> bool, True or False:
             Show debugging logs or not,
             
-        returns -> bool, 30:
-            The amount of questions a test has
+        returns -> bool, True or False:
+            If it was succesful solving the question
     """
     driver = getattr(wrapper_or_driver, "driver", wrapper_or_driver)
     pregunta = WebDriverWait(driver, timeout).until(
@@ -178,23 +171,28 @@ def solve_question(wrapper_or_driver, question_indx:int, timeout:int=10, answers
         if DEBUGGING: print(f"\033[33m[?] Error solving question #{question_indx}: {e}\Trying multi-choice\033[0m")
         return False
 
-def solve_multiple_choice(wrapper_or_driver, question_indx:int, timeout:int=10, answers:Union[int, list, None]=None) -> bool:
+def solve_multiple_choice(
+    wrapper_or_driver:"WebAutomation",
+    question_indx:int,
+    answers:Union[int, list, None] = None,
+    timeout:int = 10
+    ) -> bool:
     """
     Function to solve the multi-choice question of a test
         wrapper_or_driver -> Selenium driver:
-            The Selenium bot driver,
+            Selenium's WebAutomation instance,
 
         question_indx -> int, 3:
             The index of the question to solve,
 
         timeout -> int, 10:
-            The time to wait for elements to load,
+            Time to wait for elements to load,
 
         answers -> int or list, 1 or [[1, 0, 0], 0, 0, 2, 3]:
             The next set of answers to try,
 
-        returns -> bool, 30:
-            The amount of questions a test has
+        returns -> bool, True or False:
+            If it was succesful solving the multi-choice question
     """
     driver = getattr(wrapper_or_driver, "driver", wrapper_or_driver)
     pregunta = WebDriverWait(driver, timeout).until(
@@ -226,23 +224,28 @@ def solve_multiple_choice(wrapper_or_driver, question_indx:int, timeout:int=10, 
 
         return False
 
-def handle_finishing_buttons(wrapper_or_driver, question_indx:int, timeout:int=10, DEBUGGING:bool=False) -> bool:
+def handle_finishing_buttons(
+    wrapper_or_driver:"WebAutomation",
+    question_indx:int,
+    timeout:int = 10,
+    DEBUGGING:bool = False
+    ) -> bool:
     """
     Function to find and click the submitting buttons of a test
         wrapper_or_driver -> Selenium driver:
-            The Selenium bot driver,
+            Selenium's WebAutomation instance,
 
         question_indx -> int, 3:
             The index of the question to solve,
 
         timeout -> int, 10:
-            The time to wait for elements to load,
+            Time to wait for elements to load,
 
         DEBUGGING -> bool, True or false:
             Show debugging logs or not,
             
-        returns -> bool, 30:
-            The amount of questions a test has
+        returns -> bool, True or False:
+            If it was succesful handling the finishing buttons
     """
 
     driver = getattr(wrapper_or_driver, "driver", wrapper_or_driver)
@@ -287,14 +290,19 @@ def handle_finishing_buttons(wrapper_or_driver, question_indx:int, timeout:int=1
         
         return False
 
-def solve_test(wrapper_or_driver, timeout:int=10, answers:Union[int, list, None]=None, DEBUGGING:bool=False) -> int:
+def solve_test(
+    wrapper_or_driver:"WebAutomation",
+    answers:Union[int, list, None] = None,
+    timeout:int = 10,
+    DEBUGGING:bool = False
+    ) -> int:
     """
     Function to solve the multi-choice question of a test
         wrapper_or_driver -> Selenium driver:
-            The Selenium bot driver,
+            Selenium's WebAutomation instance,
 
         timeout -> int, 10:
-            The time to wait for elements to load,
+            Time to wait for elements to load,
 
         answers -> int or list, 1 or [1, 0, 0, 2, 3]:
             The next set of answers to try,
@@ -326,10 +334,10 @@ def solve_test(wrapper_or_driver, timeout:int=10, answers:Union[int, list, None]
                         answer = answers_options
                         print(f"\033[91m[!] Not enough options in question #{i+1}, selecting last option instead of {answer}\033[0m")
 
-            if not solve_question(wrapper_or_driver, i+1, timeout, answer, DEBUGGING):
+            if not solve_question(wrapper_or_driver=wrapper_or_driver, question_indx=i+1, answers=answer, timeout=timeout, DEBUGGING=DEBUGGING):
 
                 if DEBUGGING: print(f"\033[33m[?] Exception, missing answer box in question #{i+1}\nSolving as multiple choice\033[0m")
-                solve_multiple_choice(wrapper_or_driver, i+1, timeout, answer)
+                solve_multiple_choice(wrapper_or_driver=wrapper_or_driver, question_indx=i+1, answers=answer, timeout=timeout)
 
         except Exception as e:
             print(f"\033[91m[!] Error in question #{i+1}, not single nor multi-choice question: {e}\033[0m")
@@ -338,17 +346,17 @@ def solve_test(wrapper_or_driver, timeout:int=10, answers:Union[int, list, None]
 
     return find_mark(wrapper_or_driver, timeout)
 
-def read_answers(wrapper_or_driver, timeout:int=10) -> dict:
+def read_answers(wrapper_or_driver:"WebAutomation", timeout:int=10) -> dict:
     """
     Function to read the solutions of a test
         wrapper_or_driver -> Selenium driver:
-            The Selenium bot driver,
+            Selenium's WebAutomation instance,
 
         timeout -> int, 10:
-            The time to wait for elements to load,
+            Time to wait for elements to load,
             
-        returns -> dict, {0: "1",...}:
-            The amount of questions a test has
+        returns -> dict, {1: 1, 2: 0...}:
+            The answers of each question; if correct, the last tried answer, otherwise, 0
     """
     driver = getattr(wrapper_or_driver, "driver", wrapper_or_driver)
     results = {}

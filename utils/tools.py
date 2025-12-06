@@ -38,35 +38,43 @@ class ASCII_ART:
 def setup_config() -> dict:
     """
     Sets up the program variables:
-        AUTOMATED_LOGIN -> bool, True or False:
-            Login will be executed by the bot or the user,
-        
-        UNIR_USERNAME -> string, your@unir.email:
+        USERNAME -> str, your@unir.email:
             Bot will use this as your valid UNIR/Moodle email,
         
-        UNIR_PASSWORD -> string, yourpassword:
+        PASSWORD -> str, yourpassword:
             Bot will use this as your valid UNIR/Moodle password,
         
-        UNIR_COURSES -> string (of integers), COURSE1,COURSE2...:
+        COURSES -> str (of integers), COURSE1,COURSE2...:
             Bot will use those as the desired tests to complete,
         
-        LOGIN_URL -> string, https://your.desired.moodle/login/page:  (default, UNIR's one)
-            Bot will use this for the login process
+        LOGIN_URL -> str, https://your.desired.moodle/login/page:  (default, UNIR's one)
+            Bot will use this for the login process,
+
+        returns -> dict, {"USERNAME": "your@desired.email", "PASSWORD": "yourPassword", ...}
+            The bot configuration parameters
     """
     args = arg.parse_args() 
     config = {}
     
-    if args.username is None or args.password is None: config["AUTOMATED_LOGIN"] = False
-    if args.username: config["UNIR_USERNAME"] = args.username
-    if args.password: config["UNIR_PASSWORD"] = args.password
-    if args.courses: config["UNIR_COURSES"] = args.courses
+    # Blank config to avoid errors when executing the program
+    config["USERNAME"] = None
+    config["PASSWORD"] = None
+    config["COURSES"] = None
+    config["LOGIN_URL"] = None
+    config["COURSES_HOME_URL"] = None
+
+    # Updating config
+    if args.username: config["USERNAME"] = args.username
+    if args.password: config["PASSWORD"] = args.password
+    if args.courses: config["COURSES"] = args.courses
     if args.target_url: config["LOGIN_URL"] = args.target_url
+    if args.courses_url: config["COURSES_HOME_URL"] = args.courses_url
     if args.example:
         print('\033[33m[?] python main.py --username tu@correo.com --password contraseña1234 --courses 1234,1235,1234\033[0m')
         exit(0)
     return config
 
-def swap_errors_with(original_list: list, new_value: int) -> list:
+def swap_errors_with(original_list:list, new_value:int) -> list:
     """
     Function to overwrite the test incorrect answers with the next desired option:
         original_list -> list, [1, 0, 0, 2, 3]:
@@ -76,7 +84,7 @@ def swap_errors_with(original_list: list, new_value: int) -> list:
             The next value to try as an answer,
         
         returns -> list, [1, 4, 4, 2, 3]:
-            The original_list with the next value for each 0
+            The original_list with the next value for each 0 (aka, wrong answers)
     """
     new_list = []
 
@@ -86,14 +94,14 @@ def swap_errors_with(original_list: list, new_value: int) -> list:
 
     return new_list
 
-def dict_to_list(dictionary: dict) -> list:
+def dict_to_list(dictionary:dict) -> list:
     """
     Transforms a dictionary (from test.read_answers()) to a usable list:
         dictionary -> dict, {1: 1, 2: 0, 3: 0, 4: 2, 5: 3}:
             The results after reading test's correction (with 0 for each wrong answer),
         
         returns -> list, [1, 0, 0, 2, 3]:
-            The same dictionary as a list where the index of a solution is the question's number
+            The desired dictionary as a list, where the index of a solution is the number of the question
     """
     new_list = []
     
@@ -101,7 +109,7 @@ def dict_to_list(dictionary: dict) -> list:
     
     return new_list
 
-def combinate_answers(original_answers: list, binary_answers: list) -> list:
+def combinate_answers(original_answers:list, binary_answers:list) -> list:
     """
     Simple vectorial multiplication:
         original_answers -> list, [1, 3, 3, 2, 3]:
@@ -111,7 +119,7 @@ def combinate_answers(original_answers: list, binary_answers: list) -> list:
             The list correct or incorrect questions,
         
         returns -> list, [1, 0, 0, 2, 3]:
-                The list of the correct answers
+            The list of the correct answers
     """
     combined = []
 
