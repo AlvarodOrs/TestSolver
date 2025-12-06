@@ -55,7 +55,6 @@ def iterate_tests(automation:"WebAutomation", timeout:int = 10, DEBUGGING:bool =
     print(f", {len(tests_urls)} tests found")
     tests = automation.driver.find_elements(By.XPATH, "//span[@class='text-activityname' and contains(text(), 'Test Tema')]")
     _indx = 0
-    tests_urls = tests_urls[-1:]
     for test_url in tests_urls:
         _indx += 1
         print(f"    \033[4m[+] Going to test number {_indx}: {test_url}\033[0m")
@@ -67,9 +66,6 @@ def iterate_tests(automation:"WebAutomation", timeout:int = 10, DEBUGGING:bool =
         default_answer = 0
         available_answer_options = ['a', 'b', 'c', 'd', 'e']
         while 0 in test_results or not test_results:
-
-            #break #Debugging
-
 
             if not test.find_test_button(automation=automation, timeout=timeout):
                 print(f"[!] Can't find test button")
