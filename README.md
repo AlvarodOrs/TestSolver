@@ -51,16 +51,16 @@ Click the wanted course (1), then copy the url code (2) and repeat with all desi
 #### Run the bot with:
 
 ```bash
-python main.py --username tu@correo.com --password contraseña1234 --courses codigomateria1,codigomateria2,...
+python main.py
 ```
 
-### Arguments
+### Parameters to change on config.py
 
 | Argument     | Required | Description                                |
 | ------------ | -------- | ------------------------------------------ |
-| `--username` | Yes      | Your UNIR login email                      |
-| `--password` | Yes      | Your UNIR campus password                  |
-| `--courses`  | Yes      | Comma-separated list of course identifiers |
+| `USERNAME` | Yes      | Your UNIR login email                      |
+| `PASSWORD` | Yes      | Your UNIR campus password                  |
+| `COURSES`  | Yes      | Comma-separated list of course identifiers |
 
 Example:
 
