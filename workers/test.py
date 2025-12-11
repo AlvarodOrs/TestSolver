@@ -168,7 +168,7 @@ def solve_question(
         return True
 
     except Exception as e:
-        if DEBUGGING: print(f"\033[33m[?] Error solving question #{question_indx}: {e}\Trying multi-choice\033[0m")
+        if DEBUGGING: print(f"\033[33m[?] Error solving question #{question_indx}: {e}\nTrying multi-choice\033[0m")
         return False
 
 def solve_multiple_choice(

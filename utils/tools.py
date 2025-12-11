@@ -1,6 +1,7 @@
 try: from utils import args as arg
 except ImportError: import args as arg
 import winsound
+import json
 
 def beep_sound(frequency:int = 3000, duration:int = 1000) -> None:
     """
@@ -53,24 +54,20 @@ def setup_config() -> dict:
         returns -> dict, {"USERNAME": "your@desired.email", "PASSWORD": "yourPassword", ...}
             The bot configuration parameters
     """
-    args = arg.parse_args() 
-    config = {}
-    
-    # Blank config to avoid errors when executing the program
-    config["USERNAME"] = None
-    config["PASSWORD"] = None
-    config["COURSES"] = None
-    config["LOGIN_URL"] = None
-    config["COURSES_HOME_URL"] = None
+    def _config(filepath:str = 'config.json') -> list:
+        config = {}
+        with open(filepath, 'r') as file: data = json.load(file)
+        for parameter in data: config[parameter] = data[parameter] 
+        return config
 
+    args = arg.parse_args() 
+    config = _config()
+    
     # Updating config
-    if args.username: config["USERNAME"] = args.username
-    if args.password: config["PASSWORD"] = args.password
-    if args.courses: config["COURSES"] = args.courses
-    if args.target_url: config["LOGIN_URL"] = args.target_url
-    if args.courses_url: config["COURSES_HOME_URL"] = args.courses_url
+    if args.timeout: config["timeout"] = args.timeout
+    if args.debug: config["debug"] = args.debug
     if args.example:
-        print('\033[33m[?] python main.py --username tu@correo.com --password contraseña1234 --courses 1234,1235,1234\033[0m')
+        print('\033[33m[?] python main.py --timeout 10 --debug False\033[0m')
         exit(0)
     return config
 

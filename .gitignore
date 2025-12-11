@@ -2,3 +2,4 @@
 .testing/
 **/__pycache__
 **/_testing.py
+config.json

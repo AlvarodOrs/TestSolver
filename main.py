@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import os
 import time
+import json
 
 def enter_log_in_page(
     automation:"WebAutomation",
@@ -107,13 +108,13 @@ def iterate_tests(automation:"WebAutomation", timeout:int = 10, DEBUGGING:bool =
     print("\033[1m[+] Course completed\033[0m")
     return True
         
-def iterate_courses(automation:"WebAutomation", COURSES_HOME_URL:str = None, COURSES:str = None, timeout:int = 10, DEBUGGING:bool = False) -> bool:
+def iterate_courses(automation:"WebAutomation", COURSES_BASE_URL:str = None, COURSES:str = None, timeout:int = 10, DEBUGGING:bool = False) -> bool:
     try:
-        for course_id in COURSES.split(','):
+        for course_id in COURSES:
         
             print(f"\n\033[4m[+] Entering course: {course_id}\033[0m", end="")
             
-            automation.navigate(f"{COURSES_HOME_URL}{course_id}")
+            automation.navigate(f"{COURSES_BASE_URL}{course_id}")
             
             actividades = WebDriverWait(automation.driver, timeout).until(
                 EC.element_to_be_clickable((By.XPATH, '//*[@id="proeduca-courseuppermenu-nav-tabs"]/li[8]/a')))
@@ -135,6 +136,7 @@ def main():
     """
     Main function to orchestrate bot operations
     """
+
     os.system("")
 
     # ASCII art
@@ -142,12 +144,12 @@ def main():
 
     # Launch the bot
     config = tools.setup_config()
-
+    
     if "USERNAME" in config: USERNAME = config["USERNAME"]
     if "PASSWORD" in config: PASSWORD = config["PASSWORD"]
     if "COURSES" in config: COURSES = config["COURSES"]
     if "LOGIN_URL" in config: LOGIN_URL = config["LOGIN_URL"]
-    if "COURSES_HOME_URL" in config: COURSES_HOME_URL = config["COURSES_HOME_URL"]
+    if "COURSES_BASE_URL" in config: COURSES_BASE_URL = config["COURSES_BASE_URL"]
     timeout = 10
     DEBUGGING = False
 
@@ -163,7 +165,7 @@ def main():
     try:
         if not enter_log_in_page(automation=automation, LOGIN_URL=LOGIN_URL, USERNAME=USERNAME, PASSWORD=PASSWORD, timeout=timeout): print("\n\033[91m[!] Login failed. Check your credentials and try again\033[0m")
 
-        if not iterate_courses(automation=automation, COURSES_HOME_URL=COURSES_HOME_URL, COURSES=COURSES, timeout=timeout, DEBUGGING=DEBUGGING): print("\n\033[91m[!] Course iteration failed. Check logs and try again\033[0m")
+        if not iterate_courses(automation=automation, COURSES_BASE_URL=COURSES_BASE_URL, COURSES=COURSES, timeout=timeout, DEBUGGING=DEBUGGING): print("\n\033[91m[!] Course iteration failed. Check logs and try again\033[0m")
         
     except Exception as e:
         print(f"[!] Error: {e}")

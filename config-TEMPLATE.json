@@ -1,0 +1,8 @@
+{
+"USERNAME": "your@email.here",
+"PASSWORD": "YourPassword",
+"COURSES": [12345, 67890, 111213],
+"LOGIN_URL": "https://campusonline.unir.net/login/index.php",
+"MIGHT BE ABLE TO DELETE COURSES_HOME_URL": "https://campusonline.unir.net/my",
+"COURSES_BASE_URL": "https://campusonline.unir.net/mod/url/view.php?id="
+}
