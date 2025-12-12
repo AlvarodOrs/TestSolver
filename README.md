@@ -9,7 +9,7 @@ A command-line automation tool that logs into the UNIR virtual campus, enters th
 * Detects and answers test questions (single choice and multi-choice)
 * Collects correction results when available
 * Uses Chrome WebDriver automatically (via `webdriver-manager`)
-* Fully scriptable from the command line
+* Scriptable from the command line
 
 ---
 
