@@ -65,10 +65,7 @@ python main.py
 Example:
 
 ```bash
-python main.py \
-  --username usuario@unir.net \
-  --password MiContraseñaSegura \
-  --courses ADS123,ALG202,POO455
+python main.py
 ```
 
 ---
@@ -90,6 +87,7 @@ project/
 │   ├── log_in.py
 │   └── test.py
 |
+├── config.json
 ├── requirements.txt
 └── README.md
 ```
