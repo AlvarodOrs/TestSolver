@@ -319,6 +319,7 @@ def solve_test(
     for i in range(num_questions):
 
         try:
+            time.sleep(timeout/(timeout*10))
             num_options = get_num_options(wrapper_or_driver, i+1)
 
             if DEBUGGING: print(f"[DEBUGGING] Question #{i+1}/{num_questions} has {num_options}")
@@ -331,8 +332,8 @@ def solve_test(
             if not isinstance(answer, list):
 
                 if answer > num_options:
-                        answer = answers_options
-                        print(f"\033[91m[!] Not enough options in question #{i+1}, selecting last option instead of {answer}\033[0m")
+                    answer = answers
+                    print(f"\033[91m[!] Not enough options in question #{i+1}, selecting last option instead of {answer}\033[0m")
 
             if not solve_question(wrapper_or_driver=wrapper_or_driver, question_indx=i+1, answers=answer, timeout=timeout, DEBUGGING=DEBUGGING):
 
