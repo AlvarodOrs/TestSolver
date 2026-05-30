@@ -1,3 +1,27 @@
+<!-- [START]
+## Overview
+
+TestSolver is a command-line bot that automates the resolution of self-assessment tests on the UNIR virtual campus. It handles login, course navigation, and test answering — supporting both single-choice and multi-choice question formats — and collects correction results when available.
+
+Built with Selenium and `webdriver-manager` for zero-configuration Chrome driver setup.
+
+## Scope
+
+- **Authentication** — automated login to the UNIR platform via credentials in config
+- **Course navigation** — supports one or multiple course IDs passed via configuration
+- **Test resolution** — detects question type and selects answers; collects correction feedback when shown
+- **Driver management** — uses `webdriver-manager` to handle Chrome WebDriver automatically
+
+## Constraints
+
+- Requires a real Chrome installation; Chromium forks may cause failures
+- Incompatible with 2FA-protected accounts
+- Dependent on UNIR's HTML structure — selector updates may be needed if the platform changes
+
+## Status
+
+Complete. Core automation flow is working. Selector maintenance may be needed over time.
+[END]-->
 # UNIR Test Bot
 
 A command-line automation tool that logs into the UNIR virtual campus, enters the specified subjects, and resolves the available tests automatically using Selenium.
